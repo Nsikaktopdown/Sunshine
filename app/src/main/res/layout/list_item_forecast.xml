@@ -4,6 +4,6 @@
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
     android:minHeight="?android:attr/listPreferredItemHeight"
-    android:id="@+id/list_item_forecast">
+    android:id="@+id/list_item_forecast_textview">
 
 </TextView>
