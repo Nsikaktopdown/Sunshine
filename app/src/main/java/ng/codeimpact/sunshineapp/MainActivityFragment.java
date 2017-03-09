@@ -164,6 +164,7 @@ public class  MainActivityFragment extends Fragment {
             String format = "json";
             String units = "metric";
             int numDays = 7;
+            String api_key = "12b713670eb1a25757bef50806438abe";
             try {
 
                 final String FORECAST_BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
@@ -171,12 +172,14 @@ public class  MainActivityFragment extends Fragment {
                 final String FORMAT_PARAM = "mode";
                 final String UNITS_PARAM = "units";
                 final String DAYS_PARAM = "cnt";
+                final String APPID = "appid";
 
                 Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
                         .appendQueryParameter(QUERY_PARAM, params[0])
                         .appendQueryParameter(FORMAT_PARAM, format)
                         .appendQueryParameter(UNITS_PARAM, units)
                         .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
+                        .appendQueryParameter(APPID,api_key)
                         .build();
 
                 URL url = new URL(builtUri.toString());
@@ -253,7 +256,7 @@ public class  MainActivityFragment extends Fragment {
        int id = item.getItemId();
         if(id == R.id.action_refresh){
             FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("uyo");
+            weatherTask.execute("Uyo");
         }
         return super.onOptionsItemSelected(item);
     }
