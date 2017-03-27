@@ -3,8 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="ng.codeimpact.sunshineapp.MainActivity">
     <item
-        android:id="@+id/action_refresh"
+        android:id="@+id/action_setting"
         android:orderInCategory="100"
-        android:title="@string/action_refresh"
+        android:title="@string/action_settings"
         app:showAsAction="never" />
+    <item android:id="@+id/action_map"
+        android:title="@string/action_map"
+        android:showAsAction="never"
+        tools:ignore="AppCompatResource" />
 </menu>

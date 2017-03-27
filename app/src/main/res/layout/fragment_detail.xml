@@ -7,5 +7,9 @@
     tools:context="ng.codeimpact.sunshineapp.DetailActivityFragment"
     tools:showIn="@layout/activity_detail">
 
+    <TextView
+        android:id="@+id/detail_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
 </android.support.constraint.ConstraintLayout>

@@ -1,7 +1,10 @@
 package ng.codeimpact.sunshineapp;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -13,6 +16,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -37,10 +41,11 @@ import static android.icu.lang.UCharacter.GraphemeClusterBreak.V;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class  MainActivityFragment extends Fragment {
+public class MainActivityFragment extends Fragment {
 
 
     private ArrayAdapter<String> mForecastAdapter;
+
     public MainActivityFragment() {
     }
 
@@ -55,9 +60,7 @@ public class  MainActivityFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-       View rootView =  inflater.inflate(R.layout.fragment_main, container, false);
-
-
+        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
 
 
         mForecastAdapter = new ArrayAdapter<String>(
@@ -74,22 +77,35 @@ public class  MainActivityFragment extends Fragment {
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
         listView.setAdapter(mForecastAdapter);
 
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                String forecast = mForecastAdapter.getItem(position);
+                Intent intent = new Intent(getActivity(), DetailActivity.class).putExtra(Intent.EXTRA_TEXT, forecast);
+                startActivity(intent);
+            }
+        });
 
 
-
-              return  rootView;
-
+        return rootView;
 
 
     }
 
-    public class FetchWeatherTask extends AsyncTask<String, Void, String[]>{
+
+    private void updateWeather() {
+        FetchWeatherTask weatherTask = new FetchWeatherTask();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        String location = prefs.getString(getString(R.string.pref_location_key), getString(R.string.pref_location_default));
+        weatherTask.execute(location);
+    }
+
+    public class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
 
         private final String LOG_TAG = FetchWeatherTask.class.getSimpleName();
 
 
-
-        private String getReadableDateString(long time){
+        private String getReadableDateString(long time) {
             SimpleDateFormat shortenedDateFormat = new SimpleDateFormat("EEE MMM dd");
             return shortenedDateFormat.format(time);
         }
@@ -124,7 +140,7 @@ public class  MainActivityFragment extends Fragment {
             dayTime = new Time();
 
             String[] resultStrs = new String[numDays];
-            for(int i = 0; i < weatherArray.length(); i++) {
+            for (int i = 0; i < weatherArray.length(); i++) {
                 String day;
                 String description;
                 String highAndLow;
@@ -133,7 +149,7 @@ public class  MainActivityFragment extends Fragment {
 
                 long dateTime;
 
-                dateTime = dayTime.setJulianDay(julianStartDay+i);
+                dateTime = dayTime.setJulianDay(julianStartDay + i);
                 day = getReadableDateString(dateTime);
 
                 JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
@@ -152,6 +168,7 @@ public class  MainActivityFragment extends Fragment {
             }
             return resultStrs;
         }
+
         @Override
         protected String[] doInBackground(String... params) {
 
@@ -179,7 +196,7 @@ public class  MainActivityFragment extends Fragment {
                         .appendQueryParameter(FORMAT_PARAM, format)
                         .appendQueryParameter(UNITS_PARAM, units)
                         .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))
-                        .appendQueryParameter(APPID,api_key)
+                        .appendQueryParameter(APPID, api_key)
                         .build();
 
                 URL url = new URL(builtUri.toString());
@@ -211,7 +228,7 @@ public class  MainActivityFragment extends Fragment {
             } catch (IOException e) {
                 Log.e(LOG_TAG, "Error ", e);
                 forecastJsonStr = null;
-            } finally{
+            } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
@@ -224,9 +241,9 @@ public class  MainActivityFragment extends Fragment {
                 }
             }
 
-            try{
-                return  getWeatherDataFromJson(forecastJsonStr,numDays);
-            } catch (JSONException e){
+            try {
+                return getWeatherDataFromJson(forecastJsonStr, numDays);
+            } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage());
                 e.printStackTrace();
             }
@@ -234,10 +251,10 @@ public class  MainActivityFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(String [] result) {
-            if(result != null){
+        protected void onPostExecute(String[] result) {
+            if (result != null) {
                 mForecastAdapter.clear();
-                for(String dayForcatStr : result){
+                for (String dayForcatStr : result) {
                     mForecastAdapter.add(dayForcatStr);
                 }
             }
@@ -247,17 +264,22 @@ public class  MainActivityFragment extends Fragment {
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-       inflater.inflate(R.menu.menu_main, menu);
+        inflater.inflate(R.menu.menu_main, menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-       int id = item.getItemId();
-        if(id == R.id.action_refresh){
-            FetchWeatherTask weatherTask = new FetchWeatherTask();
-            weatherTask.execute("Uyo");
+        int id = item.getItemId();
+        if (id == R.id.action_refresh) {
+            updateWeather();
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
     }
 }
